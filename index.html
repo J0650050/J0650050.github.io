@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>ModMate Prototype</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap">
+<style>
+/* Layout: one phone-sized wireframe screen, centered, with a shared bottom nav. Sketch look: paper background, pen-black lines, one orange accent taken from the Mustang. */
+:root{
+  --paper:#f6f3ea; --ink:#1c1c1c; --muted:#6b675c; --line:#1c1c1c; --soft:#e6e1d2; --accent:#d9591b; --stage:#d8d5cb; --ok:#2e7d4f;
+  --hand:'Patrick Hand','Segoe Print','Comic Sans MS',cursive; --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#23221f;--ink:#ece8dc;--muted:#a29d8f;--line:#ece8dc;--soft:#34322d;--accent:#f0783c;--stage:#151513;--ok:#6fcf97;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#23221f;--ink:#ece8dc;--muted:#a29d8f;--line:#ece8dc;--soft:#34322d;--accent:#f0783c;--stage:#151513;--ok:#6fcf97;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{min-height:100%;margin:0}
+body{background:var(--stage);color:var(--ink);font-family:var(--sans);font-size:15px;padding-block:20px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:390px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.phone{background:var(--paper);border:2px solid var(--line);border-radius:6px;min-height:640px;display:flex;flex-direction:column}
+.bar{text-align:center;font-family:var(--hand);font-size:20px;letter-spacing:.06em;border-bottom:2px solid var(--line);padding:8px}
+.screen{flex:1;padding:14px 16px 18px;display:flex;flex-direction:column;gap:16px}
+h2{font-family:var(--hand);font-weight:400;font-size:22px;margin:0 0 4px;letter-spacing:.03em;text-transform:uppercase}
+.sec{display:flex;flex-direction:column;gap:6px}
+.sec p{margin:0}
+.muted{color:var(--muted)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row>div{min-width:0}
+.btn{font:inherit;font-family:var(--hand);font-size:17px;color:var(--ink);background:transparent;border:2px solid var(--line);border-radius:4px;padding:6px 10px;cursor:pointer}
+.btn:hover{background:var(--soft)}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible,.nav button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.item{border-bottom:1px dashed var(--muted);padding:8px 0;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.item:last-child{border-bottom:0}
+.tag{font-family:var(--hand);border:1.5px solid var(--line);border-radius:10px;padding:0 8px;font-size:15px;white-space:nowrap}
+.tag.Installed{background:var(--ok);border-color:var(--ok);color:#fff}
+.tag.Planned{background:var(--accent);border-color:var(--accent);color:#fff}
+.done{color:var(--ok);font-family:var(--hand);font-size:17px}
+label{display:block;font-family:var(--hand);font-size:18px;text-transform:uppercase;margin-bottom:3px}
+input[type=text],input[type=number],textarea{width:100%;font:inherit;color:var(--ink);background:transparent;border:2px solid var(--line);border-radius:3px;padding:8px}
+textarea{min-height:70px;resize:vertical}
+.field{display:flex;flex-direction:column}
+.radios{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--hand);font-size:18px}
+.radios label{display:flex;align-items:center;gap:6px;text-transform:none;margin:0;font-size:18px}
+.money{font-variant-numeric:tabular-nums}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid var(--line)}
+.nav button{font-family:var(--hand);font-size:18px;text-transform:uppercase;letter-spacing:.04em;background:transparent;color:var(--ink);border:0;border-right:1px solid var(--line);padding:12px 4px;cursor:pointer}
+.nav button:last-child{border-right:0}
+.nav button[aria-current="page"]{background:var(--ink);color:var(--paper)}
+.toast{font-family:var(--hand);font-size:17px;background:var(--ink);color:var(--paper);border-radius:4px;padding:8px 12px;text-align:center}
+.note{font-size:12.5px;color:var(--muted);text-align:center;line-height:1.4}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="phone">
+  <div class="bar">MODMATE &bull; 9:41</div>
+
+  <!-- HOME -->
+  <main class="screen" id="s-home">
+   <div class="sec"><h2>My Garage</h2>
+    <div class="row"><p>2015 Mustang EcoBoost &bull; Orange</p></div>
+    <div class="btns"><button class="btn" data-toast="Only one car in this prototype.">Change Vehicle</button></div></div>
+   <div class="sec"><h2>Project Snapshot</h2>
+    <p>Spent so far: <b class="money" data-bind="spent"></b></p>
+    <p>Saved ideas: <b data-bind="ideas"></b></p>
+    <p>Next reminder: <b data-bind="nextReminder"></b></p></div>
+   <div class="sec"><h2>Quick Actions</h2>
+    <div class="btns"><button class="btn" data-go="addmod">+ Add mod idea</button><button class="btn" data-go="addexp">+ Add expense</button><button class="btn" data-go="tasks">View maintenance</button></div></div>
+   <div class="sec"><h2>Upcoming</h2><div id="upcoming"></div></div>
+   <div class="sec"><h2>Recent Idea</h2><div id="recent"></div></div>
+  </main>
+
+  <!-- MY CAR -->
+  <main class="screen" id="s-mycar" hidden>
+   <div class="sec"><h2>My Car</h2><p class="muted">2015 Mustang EcoBoost &bull; Orange</p></div>
+   <div class="sec"><div class="row"><h2>Modifications</h2><button class="btn" data-go="addmod">+ Add</button></div><div id="modlist"></div></div>
+  </main>
+
+  <!-- ADD MOD -->
+  <main class="screen" id="s-addmod" hidden>
+   <h2>Modification</h2>
+   <div class="field"><label for="m-name">Name</label><input type="text" id="m-name" placeholder="e.g. White wheels"></div>
+   <div class="field"><label for="m-cost">Estimated cost</label><input type="number" id="m-cost" inputmode="decimal" placeholder="$"></div>
+   <div class="field"><label>Status</label><div class="radios" role="radiogroup">
+     <label><input type="radio" name="m-status" value="Idea" checked> Idea</label>
+     <label><input type="radio" name="m-status" value="Planned"> Planned</label>
+     <label><input type="radio" name="m-status" value="Installed"> Installed</label></div></div>
+   <div class="field"><label for="m-notes">Notes</label><textarea id="m-notes" placeholder="Brand, size, color, or other details"></textarea></div>
+   <div class="row"><button class="btn" id="m-cancel">Cancel</button><button class="btn primary" id="m-save">Save idea</button></div>
+  </main>
+
+  <!-- TASKS -->
+  <main class="screen" id="s-tasks" hidden>
+   <div class="sec"><div class="row"><h2>Maintenance</h2><button class="btn" data-go="addrem">+ Add Reminder</button></div></div>
+   <div class="sec"><h2>Upcoming Items</h2><div id="maint"></div></div>
+   <div class="sec"><h2>Project Budget</h2>
+    <div class="row"><span>Total spending</span><b class="money" data-bind="spent"></b></div>
+    <div class="row"><span>Planned budget</span><b class="money" data-bind="budget"></b></div>
+    <div class="row"><span>Remaining</span><b class="money" data-bind="remaining"></b></div></div>
+   <div class="sec"><div class="row"><h2>Recent Expenses</h2><button class="btn" data-go="addexp">+ Add</button></div><div id="expenses"></div></div>
+  </main>
+
+  <!-- ADD REMINDER -->
+  <main class="screen" id="s-addrem" hidden>
+   <h2>New Reminder</h2>
+   <div class="field"><label for="r-name">Item</label><input type="text" id="r-name" placeholder="e.g. Brake fluid"></div>
+   <div class="field"><label for="r-due">Due (date or mileage)</label><input type="text" id="r-due" placeholder="e.g. Dec 1 or 85,000 miles"></div>
+   <div class="row"><button class="btn" data-go="tasks">Cancel</button><button class="btn primary" id="r-save">Save reminder</button></div>
+  </main>
+
+  <!-- ADD EXPENSE -->
+  <main class="screen" id="s-addexp" hidden>
+   <h2>Add Expense</h2>
+   <div class="field"><label for="e-name">Description</label><input type="text" id="e-name" placeholder="e.g. Oil + filter"></div>
+   <div class="field"><label for="e-amt">Amount</label><input type="number" id="e-amt" inputmode="decimal" placeholder="$"></div>
+   <div class="row"><button class="btn" id="e-cancel">Cancel</button><button class="btn primary" id="e-save">Save expense</button></div>
+  </main>
+
+  <!-- MEETS -->
+  <main class="screen" id="s-meets" hidden>
+   <div class="sec"><h2>Car Meets</h2><p class="muted">Sample events for this prototype.</p><div id="meetlist"></div></div>
+   <div class="sec"><h2>My Saved Meets</h2><div id="savedmeets"></div></div>
+  </main>
+
+  <div id="toastbox" style="padding:0 16px" aria-live="polite"></div>
+  <nav class="nav" aria-label="Main">
+   <button data-nav="home">Home</button><button data-nav="mycar">My Car</button><button data-nav="tasks">Tasks</button><button data-nav="meets">Meets</button>
+  </nav>
+ </div>
+ <p class="note">Low-fidelity interactive prototype for usability testing. All data is sample data and resets when the page reloads.</p>
+</div>
+
+<script>
+(function(){
+  var S={spent:640,budget:2000,ideas:[
+      {name:"White wheels",cost:1200,status:"Planned",notes:""},
+      {name:"Cat-back exhaust",cost:850,status:"Idea",notes:""},
+      {name:"Cold-weather tires",cost:700,status:"Idea",notes:""},
+      {name:"Window tint",cost:180,status:"Installed",notes:""}],
+    maint:[{name:"Oil change",due:"82,000 miles",done:false},{name:"Tire rotation",due:"Nov 15",done:false}],
+    exps:[{name:"Oil + filter",amt:58},{name:"Detail supplies",amt:32}],
+    meets:[{id:1,name:"Sunday Morning Cars & Coffee",when:"Sun 8:00 AM",where:"Pembroke Pines",saved:false},
+           {id:2,name:"Mustang Owners Night",when:"Fri 7:30 PM",where:"Hollywood",saved:false},
+           {id:3,name:"Import vs. Domestic Meet",when:"Sat 6:00 PM",where:"Miami Gardens",saved:false},
+           {id:4,name:"Track Day Info Session",when:"Next Sat 10:00 AM",where:"Homestead",saved:false}]};
+  var cur="home";
+  var $=function(s){return document.querySelector(s)}, $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+  var usd=function(n){return "$"+Math.round(n).toLocaleString("en-US")};
+  function esc(t){var d=document.createElement("div");d.textContent=t;return d.innerHTML}
+  function toast(m){var b=$("#toastbox");b.innerHTML='<div class="toast">'+esc(m)+'</div>';clearTimeout(toast.t);toast.t=setTimeout(function(){b.innerHTML=""},2200)}
+  function nextRem(){var m=S.maint.filter(function(x){return !x.done})[0];return m?m.name:"None"}
+  function render(){
+    $$("[data-bind]").forEach(function(el){var k=el.getAttribute("data-bind");
+      el.textContent={spent:usd(S.spent),budget:usd(S.budget),remaining:usd(S.budget-S.spent),ideas:S.ideas.length,nextReminder:nextRem()}[k]});
+    var up=S.maint.filter(function(x){return !x.done}).map(function(x){return '<div class="item"><span>'+esc(x.name)+' &mdash; due '+(x.due==="82,000 miles"?"soon":esc(x.due))+'</span></div>'}).join("");
+    up+='<div class="item"><span>Front tires &mdash; check this month</span></div>';
+    $("#upcoming").innerHTML=up;
+    var r=S.ideas[0];$("#recent").innerHTML=r?'<div class="item"><span>'+esc(r.name)+'</span><span class="tag '+r.status+'">'+r.status+'</span></div>':'<p class="muted">No ideas yet.</p>';
+    $("#modlist").innerHTML=S.ideas.map(function(i){return '<div class="item"><div><b>'+esc(i.name)+'</b><div class="muted money">'+(i.cost?usd(i.cost):"No estimate")+(i.notes?" &bull; "+esc(i.notes):"")+'</div></div><span class="tag '+i.status+'">'+i.status+'</span></div>'}).join("");
+    $("#maint").innerHTML=S.maint.map(function(m,i){return '<div class="item"><div><b>'+esc(m.name)+'</b><div class="muted">Due: '+esc(m.due)+'</div></div>'+
+      (m.done?'<span class="done">&#10003; Done</span>':'<div class="btns">'+(m.name==="Oil change"?'<button class="btn" data-done="'+i+'">Mark Done</button>':'<button class="btn" data-edit="'+i+'">Edit</button><button class="btn" data-done="'+i+'">Mark Done</button>')+'</div>')+'</div>'}).join("");
+    $("#expenses").innerHTML=S.exps.map(function(e){return '<div class="item"><span>'+esc(e.name)+'</span><b class="money">'+usd(e.amt)+'</b></div>'}).join("");
+    $("#meetlist").innerHTML=S.meets.map(function(m){return '<div class="item"><div><b>'+esc(m.name)+'</b><div class="muted">'+esc(m.when)+' &bull; '+esc(m.where)+'</div></div><button class="btn" data-meet="'+m.id+'" aria-pressed="'+m.saved+'">'+(m.saved?'Saved &#10003;':'Save')+'</button></div>'}).join("");
+    var sv=S.meets.filter(function(m){return m.saved});
+    $("#savedmeets").innerHTML=sv.length?sv.map(function(m){return '<div class="item"><div><b>'+esc(m.name)+'</b><div class="muted">'+esc(m.when)+'</div></div></div>'}).join(""):'<p class="muted">Nothing saved yet.</p>';
+  }
+  function go(name){
+    cur=name;
+    $$(".screen").forEach(function(s){s.hidden=(s.id!=="s-"+name)});
+    var tab={home:"home",mycar:"mycar",addmod:"mycar",tasks:"tasks",addrem:"tasks",addexp:"tasks",meets:"meets"}[name];
+    $$(".nav button").forEach(function(b){if(b.getAttribute("data-nav")===tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+    window.scrollTo(0,0);render();
+  }
+  document.addEventListener("click",function(e){
+    var t=e.target.closest("button");if(!t)return;
+    if(t.dataset.nav)return go(t.dataset.nav);
+    if(t.dataset.go)return go(t.dataset.go);
+    if(t.dataset.toast)return toast(t.dataset.toast);
+    if(t.dataset.done!==undefined){S.maint[+t.dataset.done].done=true;toast("Marked as done.");return render()}
+    if(t.dataset.edit!==undefined){var i=+t.dataset.edit;var row=t.closest(".item");
+      row.innerHTML='<input type="text" id="edit-due" value="'+esc(S.maint[i].due)+'" aria-label="New due date"><button class="btn primary" data-saveedit="'+i+'">Save</button>';return}
+    if(t.dataset.saveedit!==undefined){var v=$("#edit-due").value.trim();if(v)S.maint[+t.dataset.saveedit].due=v;toast("Due date updated.");return render()}
+    if(t.dataset.meet){var m=S.meets.filter(function(x){return x.id==t.dataset.meet})[0];m.saved=!m.saved;toast(m.saved?"Meet saved.":"Meet removed.");return render()}
+  });
+  $("#m-cancel").onclick=function(){go("mycar")};
+  $("#m-save").onclick=function(){
+    var n=$("#m-name").value.trim();if(!n){toast("Enter a name for the idea.");$("#m-name").focus();return}
+    var st=document.querySelector('input[name="m-status"]:checked').value;
+    S.ideas.unshift({name:n,cost:parseFloat($("#m-cost").value)||0,status:st,notes:$("#m-notes").value.trim()});
+    $("#m-name").value="";$("#m-cost").value="";$("#m-notes").value="";document.querySelector('input[name="m-status"]').checked=true;
+    go("mycar");toast("Idea saved.");
+  };
+  $("#r-save").onclick=function(){
+    var n=$("#r-name").value.trim();if(!n){toast("Enter an item for the reminder.");$("#r-name").focus();return}
+    S.maint.push({name:n,due:$("#r-due").value.trim()||"No date",done:false});$("#r-name").value="";$("#r-due").value="";go("tasks");toast("Reminder added.");
+  };
+  $("#e-cancel").onclick=function(){go("tasks")};
+  $("#e-save").onclick=function(){
+    var n=$("#e-name").value.trim(),a=parseFloat($("#e-amt").value);
+    if(!n){toast("Enter a description.");$("#e-name").focus();return}
+    if(!(a>0)){toast("Enter an amount greater than zero.");$("#e-amt").focus();return}
+    S.exps.unshift({name:n,amt:a});S.spent+=a;$("#e-name").value="";$("#e-amt").value="";go("tasks");toast("Expense saved.");
+  };
+  go("home");
+})();
+</script>
+
+</body>
+</html>
